@@ -1,0 +1,163 @@
+body {
+    background: rgb(228, 230, 234);
+}
+
+/* ========================= */
+/* ========================= */
+/* ========================= */
+
+.body {
+    width: 200px;
+    margin: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    background: #f2f3f5;
+    border: 0.5px solid #c1c0c0;
+    border-radius: 15px;
+    box-shadow: 0px 4px 8px 0px rgba(34, 60, 80, 0.2);
+    padding: 15px;
+}
+
+/* ========================= */
+/* ========================= */
+
+.input_field {
+    width: 100%;
+}
+
+.input_field input {
+    text-align: right;
+    background: #f2f3f5;
+    color: #0D0D0D;
+    box-shadow: 7px 7px 25px -13px rgba(37, 43, 49, 0.25) inset;
+    padding: 22.5px;
+    border: none;
+    border-radius: 20px;
+}
+.input_field input:focus {
+    outline: none;
+}
+
+/* Removes arrows for all browsers */
+.input_field input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Removes arrows for WebKit browsers */
+.input_field input[type="number"]::-webkit-outer-spin-button,
+.input_field input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* ========================= */
+/* ========================= */
+
+.numbers {
+    /* width: 150px; */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+}
+
+/* ========================= */
+
+.enter_button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    font-size: 15px;
+    /* background: #f38231; */
+    background: #f2f3f5;
+    color: #0D0D0D;
+    box-shadow: 4px 4px 8px 0px rgba(34, 60, 80, 0.2);
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all .15s;
+}
+.enter_button:hover {
+    font-size: 16px;
+    background: #f7f3f3;
+}
+.enter_button:active {
+    font-size: 14px;
+    background: #dbdcde;
+}
+
+/* ========================= */
+
+.enter_button.clear {
+    background: #e67878;
+    color: #f2f3f5;
+}
+.enter_button.clear:hover {
+    font-size: 18px;
+    background: #db5353;
+    color: #fdfdff;
+}
+.enter_button.clear:active {
+    font-size: 12px;
+    background: #e38c8c;
+}
+
+/* ========================= */
+
+.enter_button.backspace {
+    color: #fa0000;
+}
+.enter_button.backspace:hover {
+    color: #fa0000;
+}
+.enter_button.backspace:active {
+    color: #dc0808;
+}
+
+/* ========================= */
+
+.enter_button.calculation {
+    color: #1f2997;
+}
+.enter_button.calculation:hover {
+    font-size: 17px;
+    color: rgb(32, 43, 166);
+}
+.enter_button.calculation:active {
+    font-size: 14px;
+    color: #101547;
+}
+
+/* ========================= */
+
+.enter_button.punctuation {
+    color: #1A237E;
+}
+.enter_button.punctuation:hover {
+    font-size: 16px;
+    color: #1927c4;
+}
+.enter_button.punctuation:active {
+    font-size: 14px;
+    color: #111971;
+}
+
+/* ========================= */
+
+.enter_button.calculate {
+    font-size: 20px;
+    color: #54cde0;
+}
+.enter_button.calculate:hover {
+    font-size: 22px;
+    color: #64eaff;
+}
+.enter_button.calculate:active {
+    font-size: 18px;
+    color: #48b3c3;
+}

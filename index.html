@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="body">
+        <div class="input_field">
+            <!-- readonly -->
+            <input type="text" id="numberInput"> 
+        </div>
+        <div class="numbers">
+            <button class="enter_button clear" onclick="clearInput()">C</button>
+            <button class="enter_button backspace" onclick="backspace()">⌫</button>
+            <button class="enter_button calculate" onclick="calculate()">=</button>
+            <button class="enter_button calculation" onclick="appendToExpression('*')">*</button>
+            <button class="enter_button" onclick="appendToExpression('7')">7</button>
+            <button class="enter_button" onclick="appendToExpression('8')">8</button>
+            <button class="enter_button" onclick="appendToExpression('9')">9</button>
+            <button class="enter_button calculation" onclick="appendToExpression('/')">/</button>
+            <button class="enter_button" onclick="appendToExpression('4')">4</button>
+            <button class="enter_button" onclick="appendToExpression('5')">5</button>
+            <button class="enter_button" onclick="appendToExpression('6')">6</button>
+            <button class="enter_button calculation" onclick="appendToExpression('-')">-</button>
+            <button class="enter_button" onclick="appendToExpression('1')">1</button>
+            <button class="enter_button" onclick="appendToExpression('2')">2</button>
+            <button class="enter_button" onclick="appendToExpression('3')">3</button>
+            <button class="enter_button calculation" onclick="appendToExpression('+')">+</button>
+            <button class="enter_button" onclick="appendToExpression('0')">0</button>
+            <button class="enter_button punctuation" onclick="appendToExpression('(')">(</button>
+            <button class="enter_button punctuation" onclick="appendToExpression(')')">)</button>
+            <button class="enter_button calculation" onclick="appendToExpression('%')">%</button>
+            <button class="enter_button punctuation" onclick="addDecimal('.')">.</button>
+        </div>
+    </div>
+    <script src="./scripts.js"></script>
+</body>
+</html>
