@@ -93,26 +93,33 @@ function calculate() {
 }
 
 input.addEventListener('input', function(event) {
-    const value = input.value;
-    const lastChar = value.slice(-1);
+    let value = input.value;
+
+    value = value.replace(/\s/g, '');
 
     const allowedChars = /[0-9+\-*/().%]/;
-    if (!allowedChars.test(lastChar) && value !== '') {
-        input.value = currentExpression;
-        return;
-    }
-    
-    if (currentExpression === '0' && /[0-9]/.test(lastChar)) {
-        currentExpression = lastChar;
-    } else {
-        currentExpression = value;
+    let filteredValue = '';
+    for (let i = 0; i < value.length; i++) {
+        if (allowedChars.test(value[i])) {
+            filteredValue += value[i];
+        }
     }
 
+    if (value !== filteredValue) {
+        input.value = filteredValue;
+        value = filteredValue;
+    }
+
+    currentExpression = value;
     updateDisplay();
 });
 
 input.addEventListener('keydown', function(event) {
     const key = event.key;
+
+    if (event.ctrlKey || event.metaKey) {
+        return;
+    }
 
     const allowedKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
                         'Backspace', 'Enter', 'Delete', 'ArrowLeft', 'ArrowRight', 
@@ -127,6 +134,29 @@ input.addEventListener('keydown', function(event) {
         event.preventDefault();
         calculate();
     }
+});
+
+input.addEventListener('paste', function(event) {
+    setTimeout(() => {
+        let value = input.value;
+        value = value.replace(/\s/g, '');
+        
+        const allowedChars = /[0-9+\-*/().%]/;
+        let filteredValue = '';
+        for (let i = 0; i < value.length; i++) {
+            if (allowedChars.test(value[i])) {
+                filteredValue += value[i];
+            }
+        }
+
+        if (value !== filteredValue) {
+            input.value = filteredValue;
+            value = filteredValue;
+        }
+
+        currentExpression = value;
+        updateDisplay();
+    }, 0);
 });
 
 function appendToExpression(value) {
