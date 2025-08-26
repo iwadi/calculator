@@ -1,38 +1,139 @@
 const input = document.getElementById('numberInput');
 let currentExpression = '';
-let history = [];
+// let history = [];
 
-// Новый обработчик событий для контроля ввода с клавиатуры
-input.addEventListener('keydown', function(event) {
-    const key = event.key;
-    const allowedKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'Backspace', 'Enter', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
+function evaluateSimpleExpression(expression) {
+    if (!expression) return 0;
     
-    // Проверяем, разрешена ли клавиша
-    if (!allowedKeys.includes(key)) {
-        event.preventDefault(); // Запрещаем ввод других символов
+    const tokens = expression.match(/(\d+\.?\d*)|[+\-*/]/g);
+    if (!tokens) return 0;
+    
+    for (let i = 0; i < tokens.length; i++) {
+        if (tokens[i] === '*' || tokens[i] === '/') {
+            const left = parseFloat(tokens[i - 1]);
+            const right = parseFloat(tokens[i + 1]);
+            let result;
+            
+            if (isNaN(left) || isNaN(right)) {
+                throw new Error('Неверное выражение');
+            }
+            
+            if (tokens[i] === '*') {
+                result = left * right;
+            } else {
+                if (right === 0) throw new Error('Деление на ноль');
+                result = left / right;
+            }
+            
+            tokens.splice(i - 1, 3, result.toString());
+            i -= 2;
+        }
     }
     
-    // Обработка клавиши Enter для вычисления
-    if (key === 'Enter') {
-        event.preventDefault(); // Предотвращаем стандартное поведение Enter (например, отправку формы)
-        calculate();
+    let result = parseFloat(tokens[0]);
+    if (isNaN(result)) throw new Error('Неверное выражение');
+    
+    for (let i = 1; i < tokens.length; i += 2) {
+        const operator = tokens[i];
+        const number = parseFloat(tokens[i + 1]);
+        
+        if (isNaN(number)) throw new Error('Неверное выражение');
+        
+        if (operator === '+') {
+            result += number;
+        } else if (operator === '-') {
+            result -= number;
+        } else {
+            throw new Error('Неизвестный оператор: ' + operator);
+        }
     }
     
-    // Обновляем currentExpression, если ввод разрешён
-    setTimeout(() => {
-        currentExpression = input.value;
-    }, 0);
+    return result;
+}
+
+function evaluateExpression(expression) {
+    if (!expression) return 0;
+    
+    expression = expression.replace(/(\d+(\.\d+)?)%/g, function(match) {
+        return '(' + parseFloat(match) / 100 + ')';
+    });
+    
+    while (expression.includes('(')) {
+        const start = expression.lastIndexOf('(');
+        const end = expression.indexOf(')', start);
+        
+        if (start === -1 || end === -1) {
+            throw new Error('Неверные скобки');
+        }
+        
+        const subExpression = expression.substring(start + 1, end);
+        const subResult = evaluateSimpleExpression(subExpression);
+        expression = expression.substring(0, start) + subResult + expression.substring(end + 1);
+    }
+    
+    return evaluateSimpleExpression(expression);
+}
+
+function updateDisplay() {
+    input.value = currentExpression;
+}
+
+function calculate() {
+    try {
+        if (currentExpression.trim() === '') return;
+        
+        const result = evaluateExpression(currentExpression);
+        // history.push(`${currentExpression} = ${result}`);
+        currentExpression = formatResult(result);
+    } catch (error) {
+        currentExpression = 'Ошибка';
+        setTimeout(() => clearInput(), 1500);
+    }
+    updateDisplay();
+}
+
+input.addEventListener('input', function(event) {
+    const value = input.value;
+    const lastChar = value.slice(-1);
+
+    const allowedChars = /[0-9+\-*/().%]/;
+    if (!allowedChars.test(lastChar) && value !== '') {
+        input.value = currentExpression;
+        return;
+    }
+    
+    if (currentExpression === '0' && /[0-9]/.test(lastChar)) {
+        currentExpression = lastChar;
+    } else {
+        currentExpression = value;
+    }
+
+    updateDisplay();
 });
 
-// Добавляет цифру, оператор или скобку в выражение
-// Добавляет цифру, оператор или скобку в выражение
+input.addEventListener('keydown', function(event) {
+    const key = event.key;
+
+    const allowedKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
+                        'Backspace', 'Enter', 'Delete', 'ArrowLeft', 'ArrowRight', 
+                        'Home', 'End', '+', '-', '*', '/', '%', '(', ')', '.'];
+
+    if (!allowedKeys.includes(key)) {
+        event.preventDefault();
+        return;
+    }
+
+    if (key === 'Enter') {
+        event.preventDefault();
+        calculate();
+    }
+});
+
 function appendToExpression(value) {
     if (currentExpression === 'Ошибка') {
         currentExpression = '';
     }
-    
-    // Новое условие: если текущее выражение '0' и новый символ не является оператором,
-    // заменяем '0' на новый символ. Это предотвращает ввод "0123".
+
     const isNewValueNumber = !['+', '-', '*', '/', '%', '(', ')', '.'].includes(value);
     if (currentExpression === '0' && isNewValueNumber) {
         currentExpression = value;
@@ -50,114 +151,45 @@ function appendToExpression(value) {
     updateDisplay();
 }
 
-// Добавляет десятичную точку
-// Добавляет десятичную точку
 function addDecimal() {
+    if (currentExpression === 'Ошибка') {
+        currentExpression = '';
+    }
+
     const parts = currentExpression.split(/[-+*/%]/);
     const lastPart = parts[parts.length - 1];
 
-    if (!lastPart.includes('.')) {
-        // Изменено: если lastPart пустой, добавляем '0.',
-        // в противном случае, добавляем просто '.'
-        if (lastPart === '') {
-            currentExpression += '0.';
-        } else if (lastPart === '0') {
-             currentExpression += '.';
-        } else {
-            currentExpression += '.';
-        }
+    if (lastPart === '' || ['+', '-', '*', '/', '%', '('].includes(currentExpression.slice(-1))) {
+        currentExpression += '0.';
+    } 
+
+    else if (!lastPart.includes('.')) {
+        currentExpression += '.';
     }
     updateDisplay();
 }
-// Очищает поле ввода
+
 function clearInput() {
     currentExpression = '';
     updateDisplay();
 }
 
-// Удаляет один символ справа
-// Удаляет один символ справа
 function backspace() {
-    // Удаляем последний символ
-    currentExpression = currentExpression.slice(0, -1);
-    
-    // Новое условие: Если после удаления currentExpression пустая строка,
-    // она такой и остаётся. Это позволяет полностью очистить поле.
-    if (currentExpression === '') {
-        updateDisplay();
-        return;
-    }
-    
-    updateDisplay();
-}
-// Вычисляет выражение
-function calculate() {
-    try {
-        const result = evaluateExpression(currentExpression);
-        currentExpression = result.toString();
-    } catch (error) {
-        currentExpression = 'Ошибка';
-        setTimeout(() => clearInput(), 1500);
+    if (currentExpression === 'Ошибка') {
+        currentExpression = '';
+    } else {
+        currentExpression = currentExpression.slice(0, -1);
     }
     updateDisplay();
 }
 
-// Функция для обработки выражения без eval()
-function evaluateExpression(expression) {
-    expression = expression.replace(/(\d+(\.\d+)?)?%/g, '($1/100)');
-
-    while (expression.includes('(')) {
-        const start = expression.lastIndexOf('(');
-        const end = expression.indexOf(')', start);
-        if (start === -1 || end === -1) {
-            throw new Error('Неверные скобки');
-        }
-        const subExpression = expression.substring(start + 1, end);
-        const subResult = evaluateSimpleExpression(subExpression);
-        expression = expression.substring(0, start) + subResult + expression.substring(end + 1);
+function formatResult(num) {
+    if (typeof num !== 'number') return num.toString();
+    
+    if (num % 1 === 0) {
+        return num.toString();
+    } else {
+        // Rounding to 10 decimal places
+        return parseFloat(num.toFixed(10)).toString();
     }
-
-    return evaluateSimpleExpression(expression);
-}
-
-// Функция для вычисления простых выражений (без скобок)
-function evaluateSimpleExpression(expression) {
-    const tokens = expression.match(/(\d+\.?\d*)|[+\-*/]/g);
-    if (!tokens) return 0;
-
-    for (let i = 1; i < tokens.length; i += 2) {
-        const operator = tokens[i];
-        if (operator === '*' || operator === '/') {
-            const left = parseFloat(tokens[i - 1]);
-            const right = parseFloat(tokens[i + 1]);
-            let result;
-            if (operator === '*') {
-                result = left * right;
-            } else {
-                if (right === 0) throw new Error('Деление на ноль');
-                result = left / right;
-            }
-            tokens.splice(i - 1, 3, result.toString());
-            i -= 2;
-        }
-    }
-
-    let result = parseFloat(tokens[0]);
-    for (let i = 1; i < tokens.length; i += 2) {
-        const operator = tokens[i];
-        const number = parseFloat(tokens[i + 1]);
-        if (operator === '+') {
-            result += number;
-        } else if (operator === '-') {
-            result -= number;
-        }
-    }
-
-    return result;
-}
-
-// Обновляет дисплей
-function updateDisplay() {
-    // Если currentExpression - пустая строка, то ничего не выводим
-    input.value = currentExpression;
 }
