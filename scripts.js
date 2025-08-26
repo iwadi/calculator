@@ -1,6 +1,6 @@
 const input = document.getElementById('numberInput');
 let currentExpression = '';
-// let history = [];
+let cursorPosition = 0;
 
 function evaluateSimpleExpression(expression) {
     if (!expression) return 0;
@@ -91,18 +91,20 @@ function calculate() {
         if (currentExpression.trim() === '') return;
         
         const result = evaluateExpression(currentExpression);
-        // history.push(`${currentExpression} = ${result}`);
         currentExpression = formatResult(result);
+        cursorPosition = currentExpression.length;
     } catch (error) {
         currentExpression = 'Ошибка';
+        cursorPosition = 0;
         setTimeout(() => clearInput(), 1500);
     }
     updateDisplay();
+    input.setSelectionRange(cursorPosition, cursorPosition);
 }
 
 input.addEventListener('input', function(event) {
+    cursorPosition = input.selectionStart;
     let value = input.value;
-
     value = value.replace(/\s/g, '');
 
     const allowedChars = /[0-9+\-*/().%]/;
@@ -120,6 +122,7 @@ input.addEventListener('input', function(event) {
 
     currentExpression = value;
     updateDisplay();
+    input.setSelectionRange(cursorPosition, cursorPosition);
 });
 
 input.addEventListener('keydown', function(event) {
@@ -146,6 +149,7 @@ input.addEventListener('keydown', function(event) {
 
 input.addEventListener('paste', function(event) {
     setTimeout(() => {
+        cursorPosition = input.selectionStart;
         let value = input.value;
         value = value.replace(/\s/g, '');
         
@@ -164,61 +168,70 @@ input.addEventListener('paste', function(event) {
 
         currentExpression = value;
         updateDisplay();
+        input.setSelectionRange(cursorPosition, cursorPosition);
     }, 0);
+});
+
+input.addEventListener('click', function(event) {
+    cursorPosition = input.selectionStart;
+});
+
+input.addEventListener('keyup', function(event) {
+    cursorPosition = input.selectionStart;
 });
 
 function appendToExpression(value) {
     if (currentExpression === 'Ошибка') {
         currentExpression = '';
+        cursorPosition = 0;
     }
 
-    const isNewValueNumber = !['+', '-', '*', '/', '%', '(', ')', '.'].includes(value);
-    if (currentExpression === '0' && isNewValueNumber) {
-        currentExpression = value;
-    } else {
-        const lastChar = currentExpression.slice(-1);
-        const isLastCharOperator = ['+', '-', '*', '/', '%'].includes(lastChar);
-        const isNewValueOperator = ['+', '-', '*', '/', '%'].includes(value);
-
-        if (isLastCharOperator && isNewValueOperator) {
-            currentExpression = currentExpression.slice(0, -1) + value;
-        } else {
-            currentExpression += value;
-        }
-    }
+    currentExpression = currentExpression.slice(0, cursorPosition) + 
+    value + 
+    currentExpression.slice(cursorPosition);
+    
+    cursorPosition += value.length;
     updateDisplay();
+    input.setSelectionRange(cursorPosition, cursorPosition);
 }
 
 function addDecimal() {
     if (currentExpression === 'Ошибка') {
         currentExpression = '';
+        cursorPosition = 0;
     }
 
-    const parts = currentExpression.split(/[-+*/%]/);
-    const lastPart = parts[parts.length - 1];
-
-    if (lastPart === '' || ['+', '-', '*', '/', '%', '('].includes(currentExpression.slice(-1))) {
-        currentExpression += '0.';
-    } 
-
-    else if (!lastPart.includes('.')) {
-        currentExpression += '.';
+    const beforeCursor = currentExpression.slice(0, cursorPosition);
+    const afterCursor = currentExpression.slice(cursorPosition);
+    
+    const currentNumber = beforeCursor.split(/[-+*/%]/).pop() + afterCursor.split(/[-+*/%]/)[0];
+    
+    if (!currentNumber.includes('.')) {
+        currentExpression = beforeCursor + '.' + afterCursor;
+        cursorPosition += 1;
+        updateDisplay();
+        input.setSelectionRange(cursorPosition, cursorPosition);
     }
-    updateDisplay();
 }
 
 function clearInput() {
     currentExpression = '';
+    cursorPosition = 0;
     updateDisplay();
+    input.setSelectionRange(0, 0);
 }
 
 function backspace() {
     if (currentExpression === 'Ошибка') {
         currentExpression = '';
-    } else {
-        currentExpression = currentExpression.slice(0, -1);
+        cursorPosition = 0;
+    } else if (cursorPosition > 0) {
+        currentExpression = currentExpression.slice(0, cursorPosition - 1) + 
+        currentExpression.slice(cursorPosition);
+        cursorPosition -= 1;
     }
     updateDisplay();
+    input.setSelectionRange(cursorPosition, cursorPosition);
 }
 
 function formatResult(num) {
@@ -227,7 +240,6 @@ function formatResult(num) {
     if (num % 1 === 0) {
         return num.toString();
     } else {
-        // Rounding to 10 decimal places
         return parseFloat(num.toFixed(10)).toString();
     }
 }
