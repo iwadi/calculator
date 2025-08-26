@@ -7,6 +7,14 @@ function evaluateSimpleExpression(expression) {
     
     const tokens = expression.match(/(\d+\.?\d*)|[+\-*/]/g);
     if (!tokens) return 0;
+
+    for (let i = 0; i < tokens.length; i++) {
+        if (tokens[i] === '-' && (i === 0 || ['+', '-', '*', '/'].includes(tokens[i-1]))) {
+            tokens[i+1] = '-' + tokens[i+1];
+            tokens.splice(i, 1);
+            i--;
+        }
+    }
     
     for (let i = 0; i < tokens.length; i++) {
         if (tokens[i] === '*' || tokens[i] === '/') {
